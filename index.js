@@ -11,6 +11,11 @@ app.get('/', (req, res) => {
   return res.send('hello, World!');
 });
 
+app.get('/myclass', (req, res) => {
+  console.log("Data Request")
+  return res.send('myclass!');
+});
+
 app.post('/', (req, res) => {
   return res.send('Post Called!');
 });
