@@ -1,12 +1,18 @@
+const dotenv = require('dotenv');
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const Users = require('./models/users.model');
 const multer = require('multer');
 const fs = require('fs');
 var cors = require('cors');
 
+// global objects
 const app = express();
 const upload = multer();
+dotenv.config();
 
+// middlewares
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -42,16 +48,40 @@ app.post('/login', (req, res) => {
   }, 5000);
 });
 
-app.post('/signup', (req, res) => {
-  fs.writeFile('user.json', JSON.stringify(req.body), (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).send('Error Saving Data');
-    }
-    return res.status(200).send("Data Saved Successfully");
+app.post('/signup', async (req, res) => {
+  // fs.writeFile('user.json', JSON.stringify(req.body), (err) => {
+  //   if (err) {
+  //     console.log(err);
+  //     return res.status(500).send('Error Saving Data');
+  //   }
+  //   return res.status(200).send("Data Saved Successfully");
+  // });
+
+  const {email, pass} = req.body;
+
+  const temp = await Users.findOne({ email: email }).then((data) => {
+    return data;
+  });
+
+  if(temp) {
+    return res.status(401).send("User already exists!");
+  }
+
+  const user = new Users({
+    email: email,
+    password: pass,
+  });
+
+  user.save().then((data) => {
+    return res.status(200).send(data);
+  }).catch((err) => {
+    return res.status(422).send(err);
   });
 })
 
 app.listen(5000, () => {
+  mongoose.connect(process.env.DATABASE_URI).then(() => {
+    console.log("Database Connected Successfully!")
+  });
   console.log("Server started on http://localhost:5000")
 });
