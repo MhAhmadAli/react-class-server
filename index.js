@@ -35,17 +35,23 @@ app.delete('/', (req, res) => {
   return res.send('Delete Called!');
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const {email, pass} = req.body;
 
-  const userData = JSON.parse(fs.readFileSync('user.json'));
+  const userData = await Users.findOne({email}).then((data) => {
+    return data;
+  });
+
+  if(!userData) {
+    return res.status(401).send("Wrong Credentials!");
+  }
 
   setTimeout(() => {
-    if(email !== userData.email && pass !== userData.pass) {
-      return res.status(401).send("Wrong Credentials");
+    if(email !== userData.email || pass !== userData.password) {
+      return res.status(401).send("Wrong Credentials!");
     }
-    return res.status(200).send("Logged in Successfully");
-  }, 5000);
+    return res.status(200).send("Logged in Successfully!");
+  }, 1000);
 });
 
 app.post('/signup', async (req, res) => {
