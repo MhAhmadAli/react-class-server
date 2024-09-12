@@ -1,10 +1,11 @@
-const dotenv = require('dotenv');
 const express = require('express');
-const bodyParser = require('body-parser');
+const cors = require('cors');
+const session = require('express-session');
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const bodyParser = require('body-parser');
 const multer = require('multer');
 const userRouter = require('./routes/userRoutes');
-var cors = require('cors');
 
 // global objects
 const app = express();
@@ -12,6 +13,12 @@ const upload = multer();
 dotenv.config();
 
 // middlewares
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 60000 }
+}));
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

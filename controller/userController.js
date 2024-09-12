@@ -1,35 +1,38 @@
 const Users = require("../models/users.model");
 const bcrypt = require("bcryptjs");
 
-async function login (req, res) {
-  const {email, pass} = req.body;
+async function login(req, res) {
+  const { email, pass } = req.body;
 
-  const userData = await Users.findOne({email}).then((data) => {
+  const userData = await Users.findOne({ email }).then((data) => {
     return data;
   });
 
-  if(!userData) {
+  if (!userData) {
     return res.status(401).send("Wrong Credentials!");
   }
 
   const isSame = bcrypt.compareSync(pass, userData.password);
 
   setTimeout(() => {
-    if(email !== userData.email || !isSame) {
+    if (email !== userData.email || !isSame) {
       return res.status(401).send("Wrong Credentials!");
     }
-    return res.status(200).send("Logged in Successfully!");
+
+    userData.password = undefined;
+    req.session.user = userData;
+    return res.status(200).send(userData);
   }, 1000);
 };
 
-async function signup (req, res) {
-  const {email, pass} = req.body;
+async function signup(req, res) {
+  const { email, pass } = req.body;
 
   const temp = await Users.findOne({ email: email }).then((data) => {
     return data;
   });
 
-  if(temp) {
+  if (temp) {
     return res.status(401).send("User already exists!");
   }
 
@@ -47,19 +50,22 @@ async function signup (req, res) {
   });
 }
 
-async function dynamicEmail (req, res) {
-  const user = await Users.findOne({email: req.params.email}).then((data) => {
+async function dynamicEmail(req, res) {
+  const user = await Users.findOne({ email: req.params.email }).then((data) => {
     return data;
   });
   res.send(user);
 };
 
-async function getUser (req, res) {
-  const user = await Users.findOne({email: req.query.email}).then((data) => {
+async function getUser(req, res) {
+  const user = await Users.findOne({ email: req.query.email }).then((data) => {
     return data;
   });
+
   res.send(user);
 }
+
+
 
 module.exports = {
   login,
