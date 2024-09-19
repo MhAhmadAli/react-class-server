@@ -12,7 +12,6 @@ const app = express();
 const upload = multer();
 dotenv.config();
 
-console.log("ahmad branch")
 // middlewares
 app.use(session({
   secret: process.env.SESSION_SECRET,
