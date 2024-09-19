@@ -1,3 +1,10 @@
+const Joi = require('joi');
+
+const schema = Joi.object({
+  email: Joi.string().email().required(),
+  pass: Joi.string().min(10).alphanum().required()
+});
+
 function isAuthorized(req, res, next) {
   if(!req.session.user) {
     return res.status(401).send("Unauthorized!");
@@ -5,31 +12,17 @@ function isAuthorized(req, res, next) {
   next();
 }
 
-function checkEmail(req, res, next) {
-  if(!req.body.email) {
-    return res.status(400).send("Email is required!");
-  }
-  let temp  = req.body.email;
-  if (!temp.includes("@")) {
-    return res.status(400).send("Invalid Email!");
-  }
-  next();
-}
+function validateInput(req, res, next) {
+  const data = req.body;
 
-function checkPassword(req, res, next) {
-  if(!req.body.pass) {
-    return res.status(400).send("Password is required!");
+  const result = schema.validate(data);
+  if (result.error) {
+    return next(result.error.message);
   }
-  let temp = req.body.pass;
-  if (temp.length < 10) {
-    return res.status(400).send("Password must be 10 characters long!");
-  }
-
   next();
 }
 
 module.exports = {
   isAuthorized,
-  checkEmail,
-  checkPassword
+  validateInput
 };
